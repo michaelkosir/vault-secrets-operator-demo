@@ -3,12 +3,11 @@ This guide will walk you through the process of setting up and using the Vault S
 
 # Requirements
 Everything in this demo is done locally, so there are a few requirements you need to have installed on your machine:
-
-- Terraform
-- Docker
-- Kind
-- Kubectl
-- Helm
+- [Terraform](https://www.terraform.io/downloads.html)
+- [Docker](https://www.docker.com/get-started)
+- [Kind](https://kind.sigs.k8s.io/docs/user/quick-start#installation)
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/)
+- [Helm](https://helm.sh/docs/intro/install/)
 
 # Usage
 
