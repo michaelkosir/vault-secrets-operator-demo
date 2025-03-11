@@ -23,8 +23,8 @@ data "vault_policy_document" "example" {
   }
 
   rule {
-    path         = "aws/sts/example"
-    capabilities = ["create", "update"]
+    path         = "postgres/creds/example"
+    capabilities = ["read"]
   }
 }
 
@@ -68,5 +68,41 @@ resource "vault_kv_secret_v2" "this" {
   data_json = jsonencode({
     hello = "world"
     foo   = "bar"
+    ping  = "pong"
+    fizz  = "buzz"
+    api   = "8D1A95AE-8791-4045-AD3C-77AB480F7EAF"
   })
+}
+
+#
+# Database Secrets
+#
+resource "vault_mount" "postgres" {
+  depends_on = [kubernetes_service.vault_external, kubernetes_service.postgres]
+
+  path        = "postgres"
+  type        = "database"
+  description = "Database secrets engine for Postgres"
+}
+
+resource "vault_database_secret_backend_connection" "postgres" {
+  backend       = vault_mount.postgres.path
+  name          = "example"
+  allowed_roles = ["example"]
+
+  postgresql {
+    connection_url = "postgres://postgres:root@postgres.example.svc.cluster.local/postgres"
+  }
+}
+
+resource "vault_database_secret_backend_role" "postgres" {
+  backend = vault_mount.postgres.path
+  name    = "example"
+  db_name = vault_database_secret_backend_connection.postgres.name
+
+  default_ttl = 20
+
+  creation_statements = [
+    "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';"
+  ]
 }

@@ -49,7 +49,34 @@ resource "kubectl_manifest" "vault_static_secret" {
       refreshAfter: 30s
       destination:
         create: true
-        name: example
+        name: static-secrets
+        transformation:
+          excludeRaw: true
+      rolloutRestartTargets:
+        - kind: Deployment
+          name: example
+    YAML
+}
+
+resource "kubectl_manifest" "vault_dynamic_secret" {
+  depends_on = [kubectl_manifest.vault_auth, vault_database_secret_backend_role.postgres]
+
+  yaml_body = <<YAML
+    apiVersion: secrets.hashicorp.com/v1beta1
+    kind: VaultDynamicSecret
+    metadata:
+      name: example
+      namespace: example
+    spec:
+      vaultAuthRef: example
+      mount: postgres
+      type: database
+      path: creds/example
+      destination:
+        create: true
+        name: database-credentials
+        transformation:
+          excludeRaw: true
       rolloutRestartTargets:
         - kind: Deployment
           name: example
@@ -57,7 +84,7 @@ resource "kubectl_manifest" "vault_static_secret" {
 }
 
 resource "kubernetes_deployment" "example" {
-  depends_on = [kubectl_manifest.vault_static_secret]
+  depends_on = [kubectl_manifest.vault_static_secret, kubectl_manifest.vault_dynamic_secret]
 
   metadata {
     name      = "example"
@@ -87,11 +114,17 @@ resource "kubernetes_deployment" "example" {
           name    = "example"
           image   = "alpine:latest"
           command = ["/bin/sh", "-c"]
-          args    = ["env && sleep 3600"]
+          args    = ["env | grep '^[a-z]' && sleep infinity"]
 
           env_from {
             secret_ref {
-              name = "example"
+              name = "static-secrets"
+            }
+          }
+
+          env_from {
+            secret_ref {
+              name = "database-credentials"
             }
           }
         }
