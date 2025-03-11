@@ -33,7 +33,10 @@ kubectl get pods -n example
 watch kubectl get pods -n example
 watch kubectl logs -l=app=example -n=example --prefix=true --tail=50
 
-# change secrets in Vault UI
+# Update the static secret (KV engine) in the Vault UI
+# Vault Operator will resync secret after `refreshAfter` period
+# Then, it will issue a rolloutRestart on the target deployment
+# https://localhost:30080
 ```
 
 ```shell
