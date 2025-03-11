@@ -27,16 +27,23 @@ kubectl get namespaces
 kubectl get pods -n vault
 kubectl get pods -n vault-secrets-operator
 
-kubectl get secrets -n example
-kubectl get pods -n example
+# watch the (base64 encoded) database credentials change every 20s
+watch kubectl get secrets -n example database-credentials -o yaml
 
+# watch the pods rollingUpdate
 watch kubectl get pods -n example
+
+# watch the application logs (prints environment variables)
+# database credentials change every 20s
+# static secrets change when updated in Vault
 watch kubectl logs -l=app=example -n=example --prefix=true --tail=50
 
 # Update the static secret (KV engine) in the Vault UI
-# Vault Operator will resync secret after `refreshAfter` period
-# Then, it will issue a rolloutRestart on the target deployment
-# https://localhost:30080
+# visit https://localhost:30080 in a browser
+# under kv/path/to/secret, update the secret data
+
+# watch for the static secrets to change
+watch kubectl logs -l=app=example -n=example --prefix=true --tail=50
 ```
 
 ```shell
