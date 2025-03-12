@@ -27,14 +27,13 @@ kubectl get namespaces
 kubectl get pods -n vault
 kubectl get pods -n vault-secrets-operator
 
-# watch the (base64 encoded) database credentials change every 20s
+# watch the (base64 encoded) database credentials change
 watch kubectl get secrets -n example database-credentials -o yaml
 
 # watch the pods rollingUpdate
 watch kubectl get pods -n example
 
 # watch the application logs (prints environment variables)
-# database credentials change every 20s
 # static secrets change when updated in Vault
 watch kubectl logs -l=app=example -n=example --prefix=true --tail=50
 
