@@ -2,7 +2,7 @@
 # Auth and Policy
 #
 resource "vault_auth_backend" "k8s" {
-  depends_on = [kubernetes_service.vault_external]
+  depends_on = [kubernetes_service.vault]
 
   type        = "kubernetes"
   path        = "k8s"
@@ -10,7 +10,7 @@ resource "vault_auth_backend" "k8s" {
 }
 
 resource "vault_kubernetes_auth_backend_config" "k8s" {
-  depends_on = [kubernetes_service.vault_external]
+  depends_on = [kubernetes_service.vault]
 
   backend         = vault_auth_backend.k8s.path
   kubernetes_host = "https://kubernetes.default.svc.cluster.local"
@@ -29,14 +29,14 @@ data "vault_policy_document" "example" {
 }
 
 resource "vault_policy" "example" {
-  depends_on = [kubernetes_service.vault_external]
+  depends_on = [kubernetes_service.vault]
 
   name   = "example"
   policy = data.vault_policy_document.example.hcl
 }
 
 resource "vault_kubernetes_auth_backend_role" "example" {
-  depends_on = [kubernetes_service.vault_external]
+  depends_on = [kubernetes_service.vault]
 
   backend                          = vault_auth_backend.k8s.path
   role_name                        = "example"
@@ -52,7 +52,7 @@ resource "vault_kubernetes_auth_backend_role" "example" {
 # KV Secrets
 #
 resource "vault_mount" "kv" {
-  depends_on = [kubernetes_service.vault_external]
+  depends_on = [kubernetes_service.vault]
 
   path        = "kv"
   type        = "kv-v2"
@@ -60,7 +60,7 @@ resource "vault_mount" "kv" {
 }
 
 resource "vault_kv_secret_v2" "this" {
-  depends_on = [kubernetes_service.vault_external]
+  depends_on = [kubernetes_service.vault]
 
   name  = "path/to/secret"
   mount = vault_mount.kv.path
@@ -78,7 +78,7 @@ resource "vault_kv_secret_v2" "this" {
 # Database Secrets
 #
 resource "vault_mount" "postgres" {
-  depends_on = [kubernetes_service.vault_external, kubernetes_service.postgres]
+  depends_on = [kubernetes_service.vault, kubernetes_service.postgres]
 
   path        = "postgres"
   type        = "database"

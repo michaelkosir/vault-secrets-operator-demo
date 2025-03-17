@@ -72,26 +72,6 @@ resource "kubernetes_service" "vault" {
   }
 
   spec {
-    type = "ClusterIP"
-
-    selector = {
-      app = kubernetes_pod.vault.metadata[0].name
-    }
-
-    port {
-      port        = 80
-      target_port = 8200
-    }
-  }
-}
-
-resource "kubernetes_service" "vault_external" {
-  metadata {
-    name      = "vault-external"
-    namespace = kubernetes_namespace.vault.metadata[0].name
-  }
-
-  spec {
     type = "NodePort"
 
     selector = {
@@ -100,7 +80,7 @@ resource "kubernetes_service" "vault_external" {
 
     port {
       protocol    = "TCP"
-      port        = 8200
+      port        = 80
       target_port = 8200
       node_port   = 30080
     }
