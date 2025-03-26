@@ -91,7 +91,9 @@ resource "vault_database_secret_backend_connection" "postgres" {
   allowed_roles = ["example"]
 
   postgresql {
-    connection_url = "postgres://postgres:root@postgres.example.svc.cluster.local/postgres"
+    connection_url = "postgres://{{username}}:{{password}}@postgres.example.svc.cluster.local/postgres"
+    username       = "postgres"
+    password       = "root"
   }
 }
 
