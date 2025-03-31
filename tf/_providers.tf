@@ -47,6 +47,6 @@ provider "helm" {
 }
 
 provider "vault" {
-  address = "http://localhost:30080"
+  address = "http://localhost:${var.vault_node_port}"
   token   = "root"
 }
