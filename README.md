@@ -33,21 +33,21 @@ kubectl get pods -n vault
 kubectl get pods -n vault-secrets-operator
 
 # watch the (base64 encoded) database credentials change
-watch kubectl get secrets -n example database -o yaml
+watch kubectl get secrets -n demo database -o yaml
 
 # watch the pods rollingUpdate
-watch kubectl get pods -n example
+watch kubectl get pods -n demo
 
 # watch the application logs (prints environment variables)
 # static secrets change when updated in Vault
-watch kubectl logs -l=app=example -n=example --prefix=true --tail=50
+watch kubectl logs -l=app=app01 -n=demo --prefix=true --tail=50
 
 # Update the static secret (KV engine) in the Vault UI
 # visit https://localhost:30080 in a browser
 # under kv/path/to/secret, update the secret data
 
 # watch for the static secrets to change
-watch kubectl logs -l=app=example -n=example --prefix=true --tail=50
+watch kubectl logs -l=app=app01 -n=demo --prefix=true --tail=50
 ```
 
 ```shell
