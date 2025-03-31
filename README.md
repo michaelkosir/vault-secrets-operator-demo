@@ -38,16 +38,17 @@ watch kubectl get secrets -n demo database -o yaml
 # watch the pods rollingUpdate
 watch kubectl get pods -n demo
 
-# watch the application logs (prints environment variables)
-# static secrets change when updated in Vault
-watch kubectl logs -l=app=app01 -n=demo --prefix=true --tail=50
+# see our application use the logs
+# application simply print environment variables
+kubectl logs -n=demo ...
 
 # Update the static secret (KV engine) in the Vault UI
 # visit https://localhost:30080 in a browser
 # under kv/path/to/secret, update the secret data
 
-# watch for the static secrets to change
-watch kubectl logs -l=app=app01 -n=demo --prefix=true --tail=50
+# see the application use the new secrets
+# application simply print environment variables
+kubectl logs -n=demo ...
 ```
 
 ```shell
