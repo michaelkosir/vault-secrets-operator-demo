@@ -23,7 +23,7 @@ The `hashicorp/kubernetes` provider does not support deploying an Operator while
 ```shell
 cd tf/
 terraform init
-terraform apply -auto-approve
+terraform apply
 ```
 
 ```shell
@@ -51,5 +51,5 @@ watch kubectl logs -l=app=app01 -n=demo --prefix=true --tail=50
 ```
 
 ```shell
-terraform destroy -auto-approve
+terraform destroy
 ```
