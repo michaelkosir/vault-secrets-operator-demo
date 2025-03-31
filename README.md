@@ -28,7 +28,7 @@ kubectl get pods -n vault
 kubectl get pods -n vault-secrets-operator
 
 # watch the (base64 encoded) database credentials change
-watch kubectl get secrets -n example database-credentials -o yaml
+watch kubectl get secrets -n example database -o yaml
 
 # watch the pods rollingUpdate
 watch kubectl get pods -n example

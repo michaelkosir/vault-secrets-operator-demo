@@ -39,7 +39,7 @@ resource "kubectl_manifest" "vault_static_secret" {
     apiVersion: secrets.hashicorp.com/v1beta1
     kind: VaultStaticSecret
     metadata:
-      name: example
+      name: static
       namespace: example
     spec:
       vaultAuthRef: example
@@ -49,7 +49,7 @@ resource "kubectl_manifest" "vault_static_secret" {
       refreshAfter: 30s
       destination:
         create: true
-        name: static-secrets
+        name: static
         transformation:
           excludeRaw: true
       rolloutRestartTargets:
@@ -65,7 +65,7 @@ resource "kubectl_manifest" "vault_dynamic_secret" {
     apiVersion: secrets.hashicorp.com/v1beta1
     kind: VaultDynamicSecret
     metadata:
-      name: example
+      name: database
       namespace: example
     spec:
       vaultAuthRef: example
@@ -74,7 +74,7 @@ resource "kubectl_manifest" "vault_dynamic_secret" {
       path: creds/example
       destination:
         create: true
-        name: database-credentials
+        name: database
         transformation:
           excludeRaw: true
       rolloutRestartTargets:
@@ -118,13 +118,13 @@ resource "kubernetes_deployment" "example" {
 
           env_from {
             secret_ref {
-              name = "static-secrets"
+              name = "static"
             }
           }
 
           env_from {
             secret_ref {
-              name = "database-credentials"
+              name = "database"
             }
           }
         }
