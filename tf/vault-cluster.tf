@@ -45,16 +45,16 @@ resource "kubernetes_pod" "vault" {
     service_account_name = kubernetes_service_account.vault.metadata[0].name
 
     container {
-      image = "hashicorp/vault:${var.vault_version}"
       name  = "vault"
+      image = var.vault_image
 
       port {
-        container_port = 8200
+        container_port = var.vault_port
       }
 
       env {
         name  = "VAULT_DEV_LISTEN_ADDRESS"
-        value = "0.0.0.0:8200"
+        value = "0.0.0.0:${var.vault_port}"
       }
 
       env {
@@ -81,8 +81,8 @@ resource "kubernetes_service" "vault" {
     port {
       protocol    = "TCP"
       port        = 80
-      target_port = 8200
-      node_port   = 30080
+      target_port = var.vault_port
+      node_port   = var.vault_node_port
     }
   }
 }

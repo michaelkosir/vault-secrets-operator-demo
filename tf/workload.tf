@@ -1,15 +1,15 @@
-resource "kubernetes_namespace" "example" {
+resource "kubernetes_namespace" "workload" {
   depends_on = [kind_cluster.dev]
 
   metadata {
-    name = "example"
+    name = var.workload_namespace
   }
 }
 
-resource "kubernetes_service_account" "example" {
+resource "kubernetes_service_account" "workload" {
   metadata {
-    name      = "example"
-    namespace = kubernetes_namespace.example.metadata[0].name
+    name      = var.workload_name
+    namespace = var.workload_namespace
   }
 }
 
@@ -20,14 +20,14 @@ resource "kubectl_manifest" "vault_auth" {
     apiVersion: secrets.hashicorp.com/v1beta1
     kind: VaultAuth
     metadata:
-      name: example
-      namespace: example
+      name: ${var.workload_role}
+      namespace: ${var.workload_namespace}
     spec:
       method: kubernetes
       mount: k8s
       kubernetes:
-        role: example
-        serviceAccount: example
+        role: ${var.workload_role}
+        serviceAccount: ${var.workload_name}
         audiences: ["vault"]
     YAML
 }
@@ -40,9 +40,9 @@ resource "kubectl_manifest" "vault_static_secret" {
     kind: VaultStaticSecret
     metadata:
       name: static
-      namespace: example
+      namespace: ${var.workload_namespace}
     spec:
-      vaultAuthRef: example
+      vaultAuthRef: ${var.workload_role}
       mount: kv
       type: kv-v2
       path: path/to/secret
@@ -54,7 +54,7 @@ resource "kubectl_manifest" "vault_static_secret" {
           excludeRaw: true
       rolloutRestartTargets:
         - kind: Deployment
-          name: example
+          name: ${var.workload_name}
     YAML
 }
 
@@ -66,12 +66,12 @@ resource "kubectl_manifest" "vault_dynamic_secret" {
     kind: VaultDynamicSecret
     metadata:
       name: database
-      namespace: example
+      namespace: ${var.workload_namespace}
     spec:
-      vaultAuthRef: example
+      vaultAuthRef: ${var.workload_role}
       mount: postgres
       type: database
-      path: creds/example
+      path: creds/${var.workload_role}
       destination:
         create: true
         name: database
@@ -79,39 +79,39 @@ resource "kubectl_manifest" "vault_dynamic_secret" {
           excludeRaw: true
       rolloutRestartTargets:
         - kind: Deployment
-          name: example
+          name: ${var.workload_name}
     YAML
 }
 
-resource "kubernetes_deployment" "example" {
+resource "kubernetes_deployment" "workload" {
   depends_on = [kubectl_manifest.vault_static_secret, kubectl_manifest.vault_dynamic_secret]
 
   metadata {
-    name      = "example"
-    namespace = kubernetes_namespace.example.metadata[0].name
+    name      = var.workload_name
+    namespace = var.workload_namespace
   }
 
   spec {
-    replicas = 1
+    replicas = 3
 
     selector {
       match_labels = {
-        app = "example"
+        app = var.workload_name
       }
     }
 
     template {
       metadata {
         labels = {
-          app = "example"
+          app = var.workload_name
         }
       }
 
       spec {
-        service_account_name = kubernetes_service_account.example.metadata[0].name
+        service_account_name = var.workload_name
 
         container {
-          name    = "example"
+          name    = var.workload_name
           image   = "alpine:latest"
           command = ["/bin/sh", "-c"]
           args    = ["env | grep '^[a-z]' && sleep infinity"]

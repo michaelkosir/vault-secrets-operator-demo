@@ -1,13 +1,13 @@
 resource "helm_release" "vso" {
   depends_on = [kind_cluster.dev, kubernetes_pod.vault]
 
-  name             = "vault-secrets-operator"
+  name             = "vso"
   namespace        = "vault-secrets-operator"
   create_namespace = true
 
   repository = "https://helm.releases.hashicorp.com"
   chart      = "vault-secrets-operator"
-  version    = "0.9.1"
+  version    = var.vso_version
 }
 
 resource "kubectl_manifest" "vault_connection" {

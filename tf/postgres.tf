@@ -1,7 +1,7 @@
 resource "kubernetes_pod" "postgres" {
   metadata {
     name      = "postgres"
-    namespace = kubernetes_namespace.example.metadata[0].name
+    namespace = var.workload_namespace
 
     labels = {
       app = "postgres"
@@ -10,16 +10,16 @@ resource "kubernetes_pod" "postgres" {
 
   spec {
     container {
-      image = "postgres:17-alpine"
       name  = "postgres"
+      image = var.postgres_image
 
       env {
         name  = "POSTGRES_PASSWORD"
-        value = "root"
+        value = var.postgres_password
       }
 
       port {
-        container_port = 5432
+        container_port = var.postgres_port
       }
     }
   }
@@ -28,7 +28,7 @@ resource "kubernetes_pod" "postgres" {
 resource "kubernetes_service" "postgres" {
   metadata {
     name      = "postgres"
-    namespace = kubernetes_namespace.example.metadata[0].name
+    namespace = var.workload_namespace
   }
 
   spec {
@@ -39,8 +39,8 @@ resource "kubernetes_service" "postgres" {
     }
 
     port {
-      port        = 5432
-      target_port = 5432
+      port        = var.postgres_port
+      target_port = var.postgres_port
     }
   }
 }
