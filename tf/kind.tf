@@ -14,8 +14,8 @@ resource "kind_cluster" "dev" {
       role = "control-plane"
 
       extra_port_mappings {
-        container_port = 30080
-        host_port      = 30080
+        container_port = var.vault_node_port
+        host_port      = var.vault_node_port
         protocol       = "TCP"
       }
     }
