@@ -16,7 +16,7 @@ Everything in this demo is done locally, so there are a few requirements you nee
 ### Note
 This demo uses the `gavinbunney/kubectl` provider, rather than the `hashicorp/kubernetes` provider, for deploying the CRDs in order to make the demo one `terraform apply`.
 
-The `hashicorp/kubernetes` provider does not support deploying an Operator while also immediately using CRDs. For production environments, it is reccommened to use the `hashicorp/kubernetes` provider and split the Operator deployment/installation into its own repo, and the application/usage of VSO's CRDs into another repo.
+The `hashicorp/kubernetes` provider does not support deploying an Operator while also immediately using CRDs. For production environments, it is recommended to use the `hashicorp/kubernetes` provider and split the Operator deployment/installation into its own repo, and the application/usage of VSO's CRDs into another repo.
 
 # Usage
 
