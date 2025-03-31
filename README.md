@@ -1,5 +1,5 @@
 # Vault Secrets Operator Demo
-This guide will walk you through the process of setting up and using the Vault Secrets Operator to manage your Vault secrets in a Kubernetes environment. By following the steps outlined below, you'll be able to securely store and retrieve secrets using HashiCorp Vault and Kubernetes.
+This demo showcases Vault Secrets Operator (VSO), a Kubernetes operator that allows Pods to consume Vault secrets and HCP Vault Secrets Apps natively from Kubernetes Secrets.
 
 <p align="center">
     <img src="./img/vault-secrets-operator.drawio.svg" />
@@ -14,7 +14,7 @@ Everything in this demo is done locally, so there are a few requirements you nee
 - [Helm](https://helm.sh/docs/intro/install/)
 
 ### Note
-This demo uses the `gavinbunney/kubectl` provider, rather than the `hashicorp/kubernetes` provider, for deploying the CRDs in order to make the demo one `terraform apply`.
+This demo uses the `gavinbunney/kubectl` provider, rather than the `hashicorp/kubernetes` provider, for deploying the CRDs in order to make the demo a single `terraform apply`.
 
 The `hashicorp/kubernetes` provider does not support deploying an Operator while also immediately using CRDs. For production environments, it is recommended to use the `hashicorp/kubernetes` provider and split the Operator deployment/installation into its own repo, and the application/usage of VSO's CRDs into another repo.
 
