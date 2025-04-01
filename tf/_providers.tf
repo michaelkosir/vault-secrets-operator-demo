@@ -20,33 +20,37 @@ terraform {
       source  = "gavinbunney/kubectl"
       version = "1.19.0"
     }
+    terracurl = {
+      source  = "devops-rob/terracurl"
+      version = "1.2.2"
+    }
   }
 }
 
 provider "kubernetes" {
   config_path            = "~/.kube/config"
-  host                   = kind_cluster.dev.endpoint
-  client_key             = kind_cluster.dev.client_key
-  cluster_ca_certificate = kind_cluster.dev.cluster_ca_certificate
+  host                   = module.kind.endpoint
+  client_key             = module.kind.client_key
+  cluster_ca_certificate = module.kind.cluster_ca_certificate
 }
 
 provider "kubectl" {
   config_path            = "~/.kube/config"
-  host                   = kind_cluster.dev.endpoint
-  client_key             = kind_cluster.dev.client_key
-  cluster_ca_certificate = kind_cluster.dev.cluster_ca_certificate
+  host                   = module.kind.endpoint
+  client_key             = module.kind.client_key
+  cluster_ca_certificate = module.kind.cluster_ca_certificate
 }
 
 provider "helm" {
   kubernetes {
     config_path            = "~/.kube/config"
-    host                   = kind_cluster.dev.endpoint
-    client_key             = kind_cluster.dev.client_key
-    cluster_ca_certificate = kind_cluster.dev.cluster_ca_certificate
+    host                   = module.kind.endpoint
+    client_key             = module.kind.client_key
+    cluster_ca_certificate = module.kind.cluster_ca_certificate
   }
 }
 
 provider "vault" {
-  address = "http://localhost:${var.vault_node_port}"
-  token   = "root"
+  address = module.vault.external_address
+  token   = module.vault.token
 }

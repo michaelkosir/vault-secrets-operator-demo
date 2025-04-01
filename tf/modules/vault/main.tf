@@ -1,21 +1,19 @@
 resource "kubernetes_namespace" "vault" {
-  depends_on = [kind_cluster.dev]
-
   metadata {
-    name = "vault"
+    name = var.namespace
   }
 }
 
 resource "kubernetes_service_account" "vault" {
   metadata {
-    name      = "vault"
+    name      = var.name
     namespace = kubernetes_namespace.vault.metadata[0].name
   }
 }
 
 resource "kubernetes_cluster_role_binding" "vault" {
   metadata {
-    name = "vault"
+    name = var.name
   }
 
   role_ref {
@@ -33,11 +31,11 @@ resource "kubernetes_cluster_role_binding" "vault" {
 
 resource "kubernetes_pod" "vault" {
   metadata {
-    name      = "vault"
+    name      = var.name
     namespace = kubernetes_namespace.vault.metadata[0].name
 
     labels = {
-      app = "vault"
+      app = var.name
     }
   }
 
@@ -45,21 +43,21 @@ resource "kubernetes_pod" "vault" {
     service_account_name = kubernetes_service_account.vault.metadata[0].name
 
     container {
-      name  = "vault"
-      image = var.vault_image
+      name  = var.name
+      image = var.image
 
       port {
-        container_port = var.vault_port
+        container_port = var.port
       }
 
       env {
         name  = "VAULT_DEV_LISTEN_ADDRESS"
-        value = "0.0.0.0:${var.vault_port}"
+        value = "0.0.0.0:${var.port}"
       }
 
       env {
         name  = "VAULT_DEV_ROOT_TOKEN_ID"
-        value = "root"
+        value = var.token
       }
     }
   }
@@ -67,7 +65,7 @@ resource "kubernetes_pod" "vault" {
 
 resource "kubernetes_service" "vault" {
   metadata {
-    name      = "vault"
+    name      = kubernetes_pod.vault.metadata[0].name
     namespace = kubernetes_namespace.vault.metadata[0].name
   }
 
@@ -80,9 +78,9 @@ resource "kubernetes_service" "vault" {
 
     port {
       protocol    = "TCP"
-      port        = 80
-      target_port = var.vault_port
-      node_port   = var.vault_node_port
+      port        = var.port
+      target_port = var.port
+      node_port   = var.node_port
     }
   }
 }

@@ -1,5 +1,5 @@
-resource "kind_cluster" "dev" {
-  name           = "dev"
+resource "kind_cluster" "this" {
+  name           = var.name
   wait_for_ready = true
 
   kind_config {
@@ -14,22 +14,17 @@ resource "kind_cluster" "dev" {
       role = "control-plane"
 
       extra_port_mappings {
-        container_port = var.vault_node_port
-        host_port      = var.vault_node_port
+        container_port = var.node_port
+        host_port      = var.node_port
         protocol       = "TCP"
       }
     }
 
-    node {
-      role = "worker"
-    }
-
-    node {
-      role = "worker"
-    }
-
-    node {
-      role = "worker"
+    dynamic "node" {
+      for_each = range(var.workers)
+      content {
+        role = "worker"
+      }
     }
   }
 }

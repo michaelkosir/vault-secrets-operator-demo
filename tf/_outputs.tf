@@ -1,7 +1,7 @@
 output "vault_addr" {
-  value = "http://localhost:${var.vault_node_port}"
+  value = module.vault.external_address
 }
 
 output "vault_token" {
-  value = "root"
+  value = module.vault.token
 }

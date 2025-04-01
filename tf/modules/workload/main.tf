@@ -1,40 +1,48 @@
+resource "kubernetes_namespace" "this" {
+  count = var.create_namespace ? 1 : 0
+
+  metadata {
+    name = var.namespace
+  }
+}
+
+locals {
+  namespace = var.create_namespace ? kubernetes_namespace.this[0].metadata[0].name : var.namespace
+}
+
 resource "kubernetes_service_account" "workload" {
   metadata {
-    name      = var.workload_name
-    namespace = kubernetes_namespace.workload.metadata[0].name
+    name      = var.name
+    namespace = local.namespace
   }
 }
 
 resource "kubectl_manifest" "vault_auth" {
-  depends_on = [helm_release.vso]
-
   yaml_body = <<YAML
     apiVersion: secrets.hashicorp.com/v1beta1
     kind: VaultAuth
     metadata:
-      name: ${var.workload_role}
-      namespace: ${kubernetes_namespace.workload.metadata[0].name}
+      name: ${var.role}
+      namespace: ${local.namespace}
     spec:
       method: kubernetes
       mount: k8s
       kubernetes:
-        role: ${var.workload_role}
-        serviceAccount: ${var.workload_name}
+        role: ${var.role}
+        serviceAccount: ${var.name}
         audiences: ["vault"]
     YAML
 }
 
 resource "kubectl_manifest" "vault_static_secret" {
-  depends_on = [kubectl_manifest.vault_auth]
-
   yaml_body = <<YAML
     apiVersion: secrets.hashicorp.com/v1beta1
     kind: VaultStaticSecret
     metadata:
       name: static
-      namespace: ${kubernetes_namespace.workload.metadata[0].name}
+      namespace: ${kubectl_manifest.vault_auth.namespace}
     spec:
-      vaultAuthRef: ${var.workload_role}
+      vaultAuthRef: ${var.role}
       mount: kv
       type: kv-v2
       path: path/to/secret
@@ -46,24 +54,22 @@ resource "kubectl_manifest" "vault_static_secret" {
           excludeRaw: true
       rolloutRestartTargets:
         - kind: Deployment
-          name: ${var.workload_name}
+          name: ${var.name}
     YAML
 }
 
 resource "kubectl_manifest" "vault_dynamic_secret" {
-  depends_on = [kubectl_manifest.vault_auth, vault_database_secret_backend_role.postgres]
-
   yaml_body = <<YAML
     apiVersion: secrets.hashicorp.com/v1beta1
     kind: VaultDynamicSecret
     metadata:
       name: database
-      namespace: ${kubernetes_namespace.workload.metadata[0].name}
+      namespace: ${kubectl_manifest.vault_auth.namespace}
     spec:
-      vaultAuthRef: ${var.workload_role}
+      vaultAuthRef: ${var.role}
       mount: postgres
       type: database
-      path: creds/${var.workload_role}
+      path: creds/${var.role}
       destination:
         create: true
         name: database
@@ -71,16 +77,21 @@ resource "kubectl_manifest" "vault_dynamic_secret" {
           excludeRaw: true
       rolloutRestartTargets:
         - kind: Deployment
-          name: ${var.workload_name}
+          name: ${var.name}
     YAML
 }
 
 resource "kubernetes_deployment" "workload" {
-  depends_on = [kubectl_manifest.vault_static_secret, kubectl_manifest.vault_dynamic_secret]
-
   metadata {
-    name      = var.workload_name
-    namespace = kubernetes_namespace.workload.metadata[0].name
+    name      = var.name
+    namespace = local.namespace
+
+    # annotations to force dependency on VaultStaticSecret and VaultDynamicSecret
+    # alternatively use the `depends_on` argument
+    annotations = {
+      VaultStaticSecret  = "${kubectl_manifest.vault_static_secret.kind}/${kubectl_manifest.vault_static_secret.name}"
+      VaultDynamicSecret = "${kubectl_manifest.vault_dynamic_secret.kind}/${kubectl_manifest.vault_dynamic_secret.name}"
+    }
   }
 
   spec {
@@ -88,22 +99,22 @@ resource "kubernetes_deployment" "workload" {
 
     selector {
       match_labels = {
-        app = var.workload_name
+        app = var.name
       }
     }
 
     template {
       metadata {
         labels = {
-          app = var.workload_name
+          app = var.name
         }
       }
 
       spec {
-        service_account_name = var.workload_name
+        service_account_name = var.name
 
         container {
-          name    = var.workload_name
+          name    = var.name
           image   = "alpine:latest"
           command = ["/bin/sh", "-c"]
           args    = ["env | grep '^[a-z]' && sleep infinity"]
