@@ -42,7 +42,7 @@ resource "vault_kubernetes_auth_backend_role" "this" {
   role_name                        = var.workload_role
   audience                         = "vault"
   bound_service_account_names      = [var.workload_name]
-  bound_service_account_namespaces = [var.workload_namespace]
+  bound_service_account_namespaces = [kubernetes_namespace.workload.metadata[0].name]
   token_policies                   = [vault_policy.this.name]
   token_ttl                        = 60 * 60      # 1 hour
   token_max_ttl                    = 60 * 60 * 24 # 1 day
@@ -91,7 +91,7 @@ resource "vault_database_secret_backend_connection" "postgres" {
   allowed_roles = [var.workload_role]
 
   postgresql {
-    connection_url = "postgres://{{username}}:{{password}}@postgres.${var.workload_namespace}.svc.cluster.local/postgres"
+    connection_url = "postgres://{{username}}:{{password}}@postgres.${kubernetes_namespace.workload.metadata[0].name}.svc.cluster.local/postgres"
     username       = "postgres"
     password       = var.postgres_password
   }

@@ -1,7 +1,15 @@
+resource "kubernetes_namespace" "workload" {
+  depends_on = [kind_cluster.dev]
+
+  metadata {
+    name = var.workload_namespace
+  }
+}
+
 resource "kubernetes_pod" "postgres" {
   metadata {
     name      = "postgres"
-    namespace = var.workload_namespace
+    namespace = kubernetes_namespace.workload.metadata[0].name
 
     labels = {
       app = "postgres"
@@ -28,7 +36,7 @@ resource "kubernetes_pod" "postgres" {
 resource "kubernetes_service" "postgres" {
   metadata {
     name      = "postgres"
-    namespace = var.workload_namespace
+    namespace = kubernetes_namespace.workload.metadata[0].name
   }
 
   spec {
