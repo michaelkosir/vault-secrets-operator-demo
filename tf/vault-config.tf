@@ -109,3 +109,28 @@ resource "vault_database_secret_backend_role" "postgres" {
     "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';"
   ]
 }
+
+# This is a workaround for a potential race condition depending on when `terraform destroy` is run, as there may be active leases
+# Terraform works backwards, by first deleting the database connection, and the database mount
+# If active leases exist, the engine can't revoke the leases, during mount deletion, as the database connection has already been deleted
+resource "terracurl_request" "this" {
+  name = "revoke-force"
+
+  url    = "http://localhost:${var.vault_node_port}/v1/sys/health"
+  method = "GET"
+
+  response_codes = [
+    200
+  ]
+
+  destroy_url    = "http://localhost:${var.vault_node_port}/v1/sys/leases/revoke-force/${vault_mount.postgres.path}/creds"
+  destroy_method = "PUT"
+
+  destroy_headers = {
+    X-Vault-Token = "root"
+  }
+
+  destroy_response_codes = [
+    204
+  ]
+}

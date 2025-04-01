@@ -1,6 +1,20 @@
 # This file is maintained automatically by "terraform init".
 # Manual edits may be lost in future updates.
 
+provider "registry.terraform.io/devops-rob/terracurl" {
+  version     = "1.2.2"
+  constraints = "1.2.2"
+  hashes = [
+    "h1:dDW7cYxdqGMXep5HCK8JaSAE54YMeKpHT4IHe+J0t8o=",
+    "zh:2eb990a827dff68493afe538eb2ca2a27641fa48aae0db0579f863aba444aa8c",
+    "zh:4f095cd60d8f4074e4452d27da49a2181b4f38b13ca7357dd8bccc3580a2e8d6",
+    "zh:55aa8b8fb84067a08915674d4fe131bc0794a5f888f16256ab7242e2a2a4a823",
+    "zh:57fd9d9c95dd2f94c6052fb856d5c03efb0d5189a718a5ee0a8c7524b242ad30",
+    "zh:c700a1554c009f4b03712b9774c54245e0bfae13044d5fbe97105dc08000c04e",
+    "zh:c86952d18ada325d1ca9a10e79c7d0046f811cff8bac18e64e7136ad08042640",
+  ]
+}
+
 provider "registry.terraform.io/gavinbunney/kubectl" {
   version     = "1.19.0"
   constraints = "1.19.0"
