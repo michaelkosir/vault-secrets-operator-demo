@@ -8,18 +8,14 @@ resource "helm_release" "vso" {
   repository = "https://helm.releases.hashicorp.com"
   chart      = "vault-secrets-operator"
   version    = var.vso_version
-}
 
-resource "kubectl_manifest" "vault_connection" {
-  depends_on = [helm_release.vso]
+  set {
+    name  = "defaultVaultConnection.enabled"
+    value = true
+  }
 
-  yaml_body = <<YAML
-    apiVersion: secrets.hashicorp.com/v1beta1
-    kind: VaultConnection
-    metadata:
-      name: default
-      namespace: vault-secrets-operator
-    spec:
-      address: http://vault.vault.svc.cluster.local
-    YAML
+  set {
+    name  = "defaultVaultConnection.address"
+    value = "http://vault.vault.svc.cluster.local"
+  }
 }
