@@ -1,5 +1,5 @@
 resource "kubernetes_namespace" "vault" {
-  depends_on = [kind_cluster.dev]
+  depends_on = [kind_cluster.dev, kubernetes_service.postgres]
 
   metadata {
     name = "vault"
