@@ -40,7 +40,7 @@ watch kubectl get pods -n demo
 
 # see our application use the logs
 # application simply print environment variables
-kubectl logs -n=demo ...
+kubectl logs -n demo deployments/app01 --all-pods=true
 
 # Update the static secret (KV engine) in the Vault UI
 # visit https://localhost:30080 in a browser
@@ -48,7 +48,7 @@ kubectl logs -n=demo ...
 
 # see the application use the new secrets
 # application simply print environment variables
-kubectl logs -n=demo ...
+kubectl logs -n demo deployments/app01 --all-pods=true
 ```
 
 ```shell
