@@ -2,7 +2,7 @@
 # Auth and Policy
 #
 resource "vault_auth_backend" "k8s" {
-  depends_on = [kubernetes_service.vault]
+  depends_on = [kubernetes_service_v1.vault]
 
   type        = "kubernetes"
   path        = "k8s"
@@ -10,7 +10,7 @@ resource "vault_auth_backend" "k8s" {
 }
 
 resource "vault_kubernetes_auth_backend_config" "k8s" {
-  depends_on = [kubernetes_service.vault]
+  depends_on = [kubernetes_service_v1.vault]
 
   backend         = vault_auth_backend.k8s.path
   kubernetes_host = "https://kubernetes.default.svc.cluster.local"
@@ -29,20 +29,20 @@ data "vault_policy_document" "this" {
 }
 
 resource "vault_policy" "this" {
-  depends_on = [kubernetes_service.vault]
+  depends_on = [kubernetes_service_v1.vault]
 
   name   = var.workload_role
   policy = data.vault_policy_document.this.hcl
 }
 
 resource "vault_kubernetes_auth_backend_role" "this" {
-  depends_on = [kubernetes_service.vault]
+  depends_on = [kubernetes_service_v1.vault]
 
   backend                          = vault_auth_backend.k8s.path
   role_name                        = var.workload_role
   audience                         = "vault"
   bound_service_account_names      = [var.workload_name]
-  bound_service_account_namespaces = [kubernetes_namespace.workload.metadata[0].name]
+  bound_service_account_namespaces = [kubernetes_namespace_v1.workload.metadata[0].name]
   token_policies                   = [vault_policy.this.name]
   token_ttl                        = 60 * 60      # 1 hour
   token_max_ttl                    = 60 * 60 * 24 # 1 day
@@ -52,7 +52,7 @@ resource "vault_kubernetes_auth_backend_role" "this" {
 # KV Secrets
 #
 resource "vault_mount" "kv" {
-  depends_on = [kubernetes_service.vault]
+  depends_on = [kubernetes_service_v1.vault]
 
   path        = "kv"
   type        = "kv-v2"
@@ -60,7 +60,7 @@ resource "vault_mount" "kv" {
 }
 
 resource "vault_kv_secret_v2" "this" {
-  depends_on = [kubernetes_service.vault]
+  depends_on = [kubernetes_service_v1.vault]
 
   name  = "path/to/secret"
   mount = vault_mount.kv.path
@@ -78,7 +78,7 @@ resource "vault_kv_secret_v2" "this" {
 # Database Secrets
 #
 resource "vault_database_secrets_mount" "postgres" {
-  depends_on = [kubernetes_service.vault, kubernetes_service.postgres]
+  depends_on = [kubernetes_service_v1.vault, kubernetes_service_v1.postgres]
 
   path        = "postgres"
   description = "Database secrets engine for Postgres"
@@ -89,7 +89,7 @@ resource "vault_database_secrets_mount" "postgres" {
 
     username       = "postgres"
     password       = var.postgres_password
-    connection_url = "postgres://{{username}}:{{password}}@postgres.${kubernetes_namespace.workload.metadata[0].name}.svc.cluster.local/postgres"
+    connection_url = "postgres://{{username}}:{{password}}@postgres.${kubernetes_namespace_v1.workload.metadata[0].name}.svc.cluster.local/postgres"
   }
 }
 

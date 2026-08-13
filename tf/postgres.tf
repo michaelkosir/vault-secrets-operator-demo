@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "workload" {
+resource "kubernetes_namespace_v1" "workload" {
   depends_on = [kind_cluster.dev]
 
   metadata {
@@ -6,10 +6,10 @@ resource "kubernetes_namespace" "workload" {
   }
 }
 
-resource "kubernetes_pod" "postgres" {
+resource "kubernetes_pod_v1" "postgres" {
   metadata {
     name      = "postgres"
-    namespace = kubernetes_namespace.workload.metadata[0].name
+    namespace = kubernetes_namespace_v1.workload.metadata[0].name
 
     labels = {
       app = "postgres"
@@ -33,17 +33,17 @@ resource "kubernetes_pod" "postgres" {
   }
 }
 
-resource "kubernetes_service" "postgres" {
+resource "kubernetes_service_v1" "postgres" {
   metadata {
     name      = "postgres"
-    namespace = kubernetes_namespace.workload.metadata[0].name
+    namespace = kubernetes_namespace_v1.workload.metadata[0].name
   }
 
   spec {
     type = "ClusterIP"
 
     selector = {
-      app = kubernetes_pod.postgres.metadata[0].name
+      app = kubernetes_pod_v1.postgres.metadata[0].name
     }
 
     port {

@@ -1,19 +1,19 @@
-resource "kubernetes_namespace" "vault" {
-  depends_on = [kind_cluster.dev, kubernetes_service.postgres]
+resource "kubernetes_namespace_v1" "vault" {
+  depends_on = [kind_cluster.dev, kubernetes_service_v1.postgres]
 
   metadata {
     name = "vault"
   }
 }
 
-resource "kubernetes_service_account" "vault" {
+resource "kubernetes_service_account_v1" "vault" {
   metadata {
     name      = "vault"
-    namespace = kubernetes_namespace.vault.metadata[0].name
+    namespace = kubernetes_namespace_v1.vault.metadata[0].name
   }
 }
 
-resource "kubernetes_cluster_role_binding" "vault" {
+resource "kubernetes_cluster_role_binding_v1" "vault" {
   metadata {
     name = "vault"
   }
@@ -26,15 +26,15 @@ resource "kubernetes_cluster_role_binding" "vault" {
 
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.vault.metadata[0].name
-    namespace = kubernetes_namespace.vault.metadata[0].name
+    name      = kubernetes_service_account_v1.vault.metadata[0].name
+    namespace = kubernetes_namespace_v1.vault.metadata[0].name
   }
 }
 
-resource "kubernetes_pod" "vault" {
+resource "kubernetes_pod_v1" "vault" {
   metadata {
     name      = "vault"
-    namespace = kubernetes_namespace.vault.metadata[0].name
+    namespace = kubernetes_namespace_v1.vault.metadata[0].name
 
     labels = {
       app = "vault"
@@ -42,7 +42,7 @@ resource "kubernetes_pod" "vault" {
   }
 
   spec {
-    service_account_name = kubernetes_service_account.vault.metadata[0].name
+    service_account_name = kubernetes_service_account_v1.vault.metadata[0].name
 
     container {
       name  = "vault"
@@ -65,17 +65,17 @@ resource "kubernetes_pod" "vault" {
   }
 }
 
-resource "kubernetes_service" "vault" {
+resource "kubernetes_service_v1" "vault" {
   metadata {
     name      = "vault"
-    namespace = kubernetes_namespace.vault.metadata[0].name
+    namespace = kubernetes_namespace_v1.vault.metadata[0].name
   }
 
   spec {
     type = "NodePort"
 
     selector = {
-      app = kubernetes_pod.vault.metadata[0].name
+      app = kubernetes_pod_v1.vault.metadata[0].name
     }
 
     port {

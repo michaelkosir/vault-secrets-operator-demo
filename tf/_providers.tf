@@ -2,19 +2,19 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.36.0"
+      version = "3.2.1"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "2.17.0"
+      version = "3.2.0"
     }
     vault = {
       source  = "hashicorp/vault"
-      version = "4.6.0"
+      version = "5.10.1"
     }
     kind = {
       source  = "tehcyx/kind"
-      version = "0.8.0"
+      version = "0.11.0"
     }
     kubectl = {
       source  = "gavinbunney/kubectl"
@@ -38,7 +38,7 @@ provider "kubectl" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     config_path            = "~/.kube/config"
     host                   = kind_cluster.dev.endpoint
     client_key             = kind_cluster.dev.client_key

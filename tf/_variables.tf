@@ -1,7 +1,7 @@
 # Vault Cluster
 variable "vault_image" {
   description = "The specific Vault version to deploy."
-  default     = "hashicorp/vault:1.19"
+  default     = "hashicorp/vault:2.0.4"
 }
 
 variable "vault_port" {
@@ -17,7 +17,7 @@ variable "vault_node_port" {
 # Vault Secrets Operator
 variable "vso_version" {
   description = "The specific Vault Secrets Operator version to deploy."
-  default     = "0.9.1"
+  default     = "1.5.1"
 }
 
 # Postgres

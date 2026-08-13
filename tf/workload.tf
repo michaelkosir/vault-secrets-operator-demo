@@ -1,7 +1,7 @@
-resource "kubernetes_service_account" "workload" {
+resource "kubernetes_service_account_v1" "workload" {
   metadata {
     name      = var.workload_name
-    namespace = kubernetes_namespace.workload.metadata[0].name
+    namespace = kubernetes_namespace_v1.workload.metadata[0].name
   }
 }
 
@@ -13,7 +13,7 @@ resource "kubectl_manifest" "vault_auth" {
     kind: VaultAuth
     metadata:
       name: ${var.workload_role}
-      namespace: ${kubernetes_namespace.workload.metadata[0].name}
+      namespace: ${kubernetes_namespace_v1.workload.metadata[0].name}
     spec:
       method: kubernetes
       mount: k8s
@@ -32,7 +32,7 @@ resource "kubectl_manifest" "vault_static_secret" {
     kind: VaultStaticSecret
     metadata:
       name: static
-      namespace: ${kubernetes_namespace.workload.metadata[0].name}
+      namespace: ${kubernetes_namespace_v1.workload.metadata[0].name}
     spec:
       vaultAuthRef: ${var.workload_role}
       mount: kv
@@ -58,7 +58,7 @@ resource "kubectl_manifest" "vault_dynamic_secret" {
     kind: VaultDynamicSecret
     metadata:
       name: database
-      namespace: ${kubernetes_namespace.workload.metadata[0].name}
+      namespace: ${kubernetes_namespace_v1.workload.metadata[0].name}
     spec:
       vaultAuthRef: ${var.workload_role}
       mount: postgres
@@ -75,12 +75,12 @@ resource "kubectl_manifest" "vault_dynamic_secret" {
     YAML
 }
 
-resource "kubernetes_deployment" "workload" {
+resource "kubernetes_deployment_v1" "workload" {
   depends_on = [kubectl_manifest.vault_static_secret, kubectl_manifest.vault_dynamic_secret]
 
   metadata {
     name      = var.workload_name
-    namespace = kubernetes_namespace.workload.metadata[0].name
+    namespace = kubernetes_namespace_v1.workload.metadata[0].name
   }
 
   spec {
